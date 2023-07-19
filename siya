@@ -1,0 +1,133 @@
+import pyttsx3
+import datetime
+import speech_recognition as sr
+import wikipedia
+import webbrowser
+import os
+import smtplib
+import subprocess
+import sys
+
+
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+
+engine.setProperty('voice', voices[1].id)
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+def wishme():
+    hour = int(datetime.datetime.now().hour)
+    if hour>=0 and hour<12:
+        speak("Good Morning! sir")
+    elif hour>=12 and hour<18:
+        speak("Good Afternoon! sir")
+    else:
+        speak("Good Evening!")
+    speak("i am siya . please tell me how may can i help you")
+def takeCommand():#it takes microphone input from user and returns string output
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("listening.......")
+        r.pause_threshold = 0.8
+        audio = r.listen(source)
+    try:
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+    except Exception as e: #print(e)
+        print("Say that again please....")
+        return "None"
+    return query
+def open_password_window():
+    subprocess.run(["control", "/name", "Microsoft.CredentialManager"], shell=True)
+    open_password_window()
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('pandey4921@gmail.com','kmir hviy nxqi auqv')
+    server.sendmail('pandey4921@gmail.com', to, content)
+    server.close()
+
+
+
+if __name__ == "__main__":
+    wishme()
+    
+    
+    while True:
+
+
+        query = takeCommand().lower()
+        #logic for executing tasks based on query
+        if 'wikipedia' in query:
+            speak('searching Wikipedia....')
+            query = query.replace("wikipedia", "")
+            results = wikipedia.summary(query, sentences=3)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
+        elif 'open youtube' in query:
+            webbrowser.open("youtube.com")
+        elif 'open google' in query:
+            webbrowser.open("google.com")
+        elif 'open st' in query:
+            webbrowser.open("stackoverflow.com")
+        elif 'play music' in query:
+            music_dir ='C:\\Users\\akash pandey\\Desktop\\Akash photos\\audio'
+            songs = os.listdir(music_dir)
+            print(songs)
+            os.startfile(os.path.join(music_dir, songs[0]))
+        elif 'what is time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            print(strTime)
+            speak(f"sir, the time is {strTime}")
+        elif 'open SQLplus' in query:
+            sqlplus_path = r"C:\db_home\bin\sqlplus.exe"
+            os.system(sqlplus_path)
+
+
+        elif 'open chat' in query:
+            webbrowser.open("https://chat.openai.com")
+        elif 'open j note' in query:
+            user_profile = os.path.expanduser('~')
+            notebook_command = [
+        r"C:\Users\akash pandey\python\python.exe",
+        r"C:\Users\akash pandey\python\cwp.py",
+        r"C:\Users\akash pandey\python",
+        r"C:\Users\akash pandey\python\python.exe",
+        r"C:\Users\akash pandey\python\Scripts\jupyter-notebook-script.py",
+            user_profile
+    ]
+            subprocess.run(notebook_command)
+ 
+
+        elif 'open code' in query:
+            codePath = "C:\\Users\\akash pandey\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            os.startfile(codePath)
+        elif 'open cmd' in query:
+             cmdpath = os.path.join(os.environ["windir"], "system32", "cmd.exe")
+             os.startfile(cmdpath)
+
+        elif 'open password window' in query:
+             os.system("control /name Microsoft.CredentialManager")
+       
+
+        elif 'send email' in query:
+            try:
+                speak("what should i say?")
+                content = takeCommand()
+                to = "pandey4921@gmail.com"
+                sendEmail(to, content)
+                speak("Email has been sent!")
+            except Exception as e:
+                print(e)
+                speak("sorry my friend i am not able to send this email")
+            
+        elif 'exit' in query:
+            speak("Goodbye!")
+            sys.exit()
